@@ -7,6 +7,136 @@
 	},
 	"item": [
 		{
+			"name": "Create Wallet",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if(pm.response.code === 201 || pm.response.code === 200) {",
+							"    const responseData = pm.response.json();",
+							"    if(responseData.id) {",
+							"        pm.environment.set(\"walletId\", responseData.id);",
+							"        console.log(\"Variável walletId populada com sucesso\" + responseData.id)",
+							"    } else {",
+							"        console.log(\"Campo id não encontrado\")",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"pixKey\": \"sdfsdfsdfsdfds@email.com\",\n    \"balance\": 10000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/wallets",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallets"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Balance",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/wallets/{{walletId}}/balance",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallets",
+						"{{walletId}}",
+						"balance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Deposit",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"amount\": 1000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/wallets/{{walletId}}/deposit",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallets",
+						"{{walletId}}",
+						"deposit"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Withdraw",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"amount\": 1000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/wallets/{{walletId}}/withdraw",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"wallets",
+						"{{walletId}}",
+						"withdraw"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Pix Transfer",
 			"request": {
 				"method": "POST",
@@ -19,7 +149,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"senderId\": \"bd2e7681-e74a-4a34-852b-c2f483606125\",\n    \"pixKey\": \"amanda@pix.com\",\n    \"amount\": 100\n}",
+					"raw": "{\n    \"senderId\": \"00b0ae8a-da0b-4939-8ec3-7d23f7cc5f4d\",\n    \"pixKey\": \"amanda@email.com\",\n    \"amount\": 100\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -54,7 +184,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"endToEndId\": \"c1be6cc3-078c-417d-a7de-25205182889b\", \n    \"eventId\": \"EVT-888-ABC\",\n    \"status\": \"CONFIRMED\"\n}",
+					"raw": "{\n    \"endToEndId\": \"c6f1c18c-fbb9-4572-8a40-6b4d70daa44a\", \n    \"eventId\": \"EVT-888-ABC\",\n    \"status\": \"CONFIRMED\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -75,76 +205,36 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
 		},
 		{
-			"name": "Create Wallet",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/wallets",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"wallets"
-					]
-				}
-			},
-			"response": []
-		},
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
 		{
-			"name": "Get Balance",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/wallets/b4ae2067-4f01-42e4-a8c6-9a686a934608/balance",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"wallets",
-						"b4ae2067-4f01-42e4-a8c6-9a686a934608",
-						"balance"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Deposit",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"amount\": 1000\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/wallets/b4ae2067-4f01-42e4-a8c6-9a686a934608/deposit",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"wallets",
-						"b4ae2067-4f01-42e4-a8c6-9a686a934608",
-						"deposit"
-					]
-				}
-			},
-			"response": []
+			"key": "walletId",
+			"value": ""
 		}
 	]
 }

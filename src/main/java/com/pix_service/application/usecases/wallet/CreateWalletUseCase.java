@@ -1,10 +1,7 @@
 package com.pix_service.application.usecases.wallet;
 
-import com.pix_service.application.exception.PixKeyAlreadyExistException;
 import com.pix_service.domain.gateway.WalletGateway;
 import com.pix_service.domain.model.Wallet;
-import com.pix_service.infrastructure.persistence.entity.WalletEntity;
-import com.pix_service.infrastructure.persistence.repository.WalletJpaRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
