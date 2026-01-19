@@ -11,6 +11,7 @@ import com.pix_service.domain.model.Transaction;
 import com.pix_service.domain.model.TransactionStatus;
 import com.pix_service.domain.model.TransactionType;
 import com.pix_service.domain.model.Wallet;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class TransferPixUseCase {
     private final WalletGateway walletGateway;
     private final TransactionGateway transactionGateway;
@@ -33,8 +35,10 @@ public class TransferPixUseCase {
 
     @Transactional
     public TransferResponse execute(String idempotencyKey, TransferRequest transferRequest) {
+        log.info("Initiating transfer from wallet {} to pixKey {} amount {}", transferRequest.senderId(), transferRequest.pixKey(), transferRequest.amount());
         var cached = idempotencyGateway.findResult(idempotencyKey);
         if (cached.isPresent()) {
+            log.info("Idempotent transfer detected for key {}, returning cached result", idempotencyKey);
             return (TransferResponse) cached.get();
         }
 
@@ -45,11 +49,13 @@ public class TransferPixUseCase {
                 .orElseThrow(() -> new IllegalArgumentException("Receiver key not found"));
 
         if (sender.getId().equals(receiver.getId())) {
+            log.error("Attempted transfer to self for wallet {}", sender.getId());
             throw new IllegalArgumentException("Cannot transfer to self");
         }
 
         sender.debit(transferRequest.amount());
         walletGateway.save(sender);
+        log.info("Debited amount {} from sender wallet {}", transferRequest.amount(), sender.getId());
 
         String endToEndId = UUID.randomUUID().toString();
         UUID transactionId = UUID.randomUUID();
@@ -57,6 +63,7 @@ public class TransferPixUseCase {
         Transaction tx = new Transaction(transactionId, endToEndId, sender.getId(), receiver.getId(),
                 transferRequest.amount(), TransactionStatus.PENDING);
         transactionGateway.save(tx);
+        log.info("Created transaction {} with status PENDING", transactionId);
 
         ledgerEntryGateway.save(new LedgerEntry(
                 UUID.randomUUID(),
@@ -66,9 +73,11 @@ public class TransferPixUseCase {
                 endToEndId,
                 Instant.now()
         ));
+        log.info("Created ledger entry for sender wallet {}", sender.getId());
 
         TransferResponse response = new TransferResponse(endToEndId, "PENDING");
-        idempotencyGateway.saveResult(idempotencyKey, response, 86400);
+        idempotencyGateway.saveResult(idempotencyKey, response);
+        log.info("Transfer process completed for transaction {}", transactionId);
 
         return response;
     }

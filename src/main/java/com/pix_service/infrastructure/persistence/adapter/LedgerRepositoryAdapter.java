@@ -4,6 +4,7 @@ import com.pix_service.domain.gateway.LedgerEntryGateway;
 import com.pix_service.domain.model.LedgerEntry;
 import com.pix_service.infrastructure.persistence.entity.LedgerEntryEntity;
 import com.pix_service.infrastructure.persistence.repository.LedgerEntryJpaRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -11,6 +12,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Component
+@Slf4j
 public class LedgerRepositoryAdapter implements LedgerEntryGateway {
     private final LedgerEntryJpaRepository repository;
 
@@ -20,6 +22,7 @@ public class LedgerRepositoryAdapter implements LedgerEntryGateway {
 
     @Override
     public void save(LedgerEntry entry) {
+        log.info("Saving ledger entry for wallet {}", entry.walletId());
         LedgerEntryEntity entity = new LedgerEntryEntity();
         entity.setId(entry.id());
         entity.setWalletId(entry.walletId());
@@ -33,11 +36,13 @@ public class LedgerRepositoryAdapter implements LedgerEntryGateway {
 
     @Override
     public BigDecimal calculateBalanceAt(UUID id, Instant at) {
+        log.info("Calculating balance for wallet {} at {}", id, at);
         return repository.calculateBalanceAt(id, at);
     }
 
     @Override
     public void recordLedger(UUID walletId, BigDecimal amount, String type, String endToEndId) {
+        log.info("Recording ledger entry for wallet {}: amount {}, type {}, endToEndId {}", walletId, amount, type, endToEndId);
         LedgerEntryEntity entity = new LedgerEntryEntity();
         entity.setId(UUID.randomUUID());
         entity.setWalletId(walletId);

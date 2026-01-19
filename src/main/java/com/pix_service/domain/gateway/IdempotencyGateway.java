@@ -5,7 +5,7 @@ import java.util.Optional;
 public interface IdempotencyGateway {
     Optional<Object> findResult(String key);
 
-    void saveResult(String key, Object result, long ttlSeconds);
+    void saveResult(String key, Object result);
 
     boolean isEventProcessed(String eventId);
 
