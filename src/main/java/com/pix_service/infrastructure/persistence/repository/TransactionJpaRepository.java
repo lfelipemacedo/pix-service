@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface TransactionJpaRepository extends JpaRepository<TransactionEntity, UUID> {
-    Optional<TransactionEntity> findByEndToEndId(String endToEndId);
+    Optional<TransactionEntity> findByEndToEndId(UUID endToEndId);
 }

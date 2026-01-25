@@ -1,5 +1,5 @@
 CREATE TABLE wallets (
-    id CHAR(36) NOT NULL PRIMARY KEY,
+    id BINARY(16) NOT NULL PRIMARY KEY,
     pix_key VARCHAR(100),
     balance DECIMAL(20, 2) NOT NULL DEFAULT 0.00,
     version BIGINT NOT NULL DEFAULT 0,
@@ -7,10 +7,10 @@ CREATE TABLE wallets (
 );
 
 CREATE TABLE transactions (
-    id CHAR(36) NOT NULL PRIMARY KEY,
-    end_to_end_id VARCHAR(100) NOT NULL,
-    sender_wallet_id CHAR(36) NOT NULL,
-    receiver_wallet_id CHAR(36) NOT NULL,
+    id BINARY(16) NOT NULL PRIMARY KEY,
+    end_to_end_id BINARY(16) NOT NULL,
+    sender_wallet_id BINARY(16) NOT NULL,
+    receiver_wallet_id BINARY(16) NOT NULL,
     amount DECIMAL(20, 2) NOT NULL,
     status VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -21,11 +21,11 @@ CREATE TABLE transactions (
 );
 
 CREATE TABLE ledger_entries (
-    id CHAR(36) NOT NULL PRIMARY KEY,
-    wallet_id CHAR(36) NOT NULL,
+    id BINARY(16) NOT NULL PRIMARY KEY,
+    wallet_id BINARY(16) NOT NULL,
     amount DECIMAL(20, 2) NOT NULL,
     type VARCHAR(20) NOT NULL,
-    end_to_end_id VARCHAR(100) NOT NULL,
+    end_to_end_id BINARY(16) NOT NULL,
     created_at TIMESTAMP NOT NULL,
 
     FOREIGN KEY (wallet_id) REFERENCES wallets(id)
@@ -34,7 +34,7 @@ CREATE TABLE ledger_entries (
 CREATE INDEX idx_ledger_wallet_date ON ledger_entries(wallet_id, created_at);
 
 CREATE TABLE idempotency_keys (
-    key_id VARCHAR(255) NOT NULL PRIMARY KEY,
+    key_id BINARY(16) NOT NULL PRIMARY KEY,
     response_body TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

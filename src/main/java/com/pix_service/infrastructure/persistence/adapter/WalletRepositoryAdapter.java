@@ -42,7 +42,7 @@ public class WalletRepositoryAdapter implements WalletGateway {
     }
 
     @Override
-    public void recordLedger(UUID walletId, BigDecimal amount, String type, String endToEndId) {
+    public void recordLedger(UUID walletId, BigDecimal amount, String type, UUID endToEndId) {
         log.info("Recording ledger entry for wallet {}: amount {}, type {}, endToEndId {}", walletId, amount, type, endToEndId);
         ledgerRepositoryAdapter.recordLedger(walletId, amount, type, endToEndId);
     }

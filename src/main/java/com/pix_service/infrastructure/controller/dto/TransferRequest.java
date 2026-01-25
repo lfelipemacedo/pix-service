@@ -1,4 +1,4 @@
-package com.pix_service.application.dto;
+package com.pix_service.infrastructure.controller.dto;
 
 import java.math.BigDecimal;
 import java.util.UUID;

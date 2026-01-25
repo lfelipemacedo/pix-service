@@ -7,8 +7,11 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "idempotency_keys")
@@ -18,7 +21,8 @@ import java.time.Instant;
 public class IdempotencyKeyEntity {
     @Id
     @Column(name = "key_id")
-    private String keyId;
+    @JdbcTypeCode(SqlTypes.UUID)
+    private UUID keyId;
 
     @Column(name = "response_body", columnDefinition = "TEXT")
     private String responseBody;

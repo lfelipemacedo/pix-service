@@ -11,5 +11,5 @@ public interface LedgerEntryGateway {
 
     BigDecimal calculateBalanceAt(UUID id, Instant at);
 
-    void recordLedger(UUID walletId, BigDecimal amount, String type, String endToEndId);
+    void recordLedger(UUID walletId, BigDecimal amount, String type, UUID endToEndId);
 }

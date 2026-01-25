@@ -9,8 +9,12 @@ import java.util.UUID;
 
 public interface WalletGateway {
     Wallet save(Wallet wallet);
+
     Optional<Wallet> findById(UUID id);
+
     Optional<Wallet> findByPixKey(String pixKey);
+
     BigDecimal getBalanceAt(UUID walletId, Instant at);
-    void recordLedger(UUID walletId, BigDecimal amount, String type, String endToEndId);
+
+    void recordLedger(UUID walletId, BigDecimal amount, String type, UUID endToEndId);
 }

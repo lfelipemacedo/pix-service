@@ -41,7 +41,7 @@ public class LedgerRepositoryAdapter implements LedgerEntryGateway {
     }
 
     @Override
-    public void recordLedger(UUID walletId, BigDecimal amount, String type, String endToEndId) {
+    public void recordLedger(UUID walletId, BigDecimal amount, String type, UUID endToEndId) {
         log.info("Recording ledger entry for wallet {}: amount {}, type {}, endToEndId {}", walletId, amount, type, endToEndId);
         LedgerEntryEntity entity = new LedgerEntryEntity();
         entity.setId(UUID.randomUUID());

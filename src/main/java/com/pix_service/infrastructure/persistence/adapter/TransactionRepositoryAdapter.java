@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 @Slf4j
@@ -28,7 +29,7 @@ public class TransactionRepositoryAdapter implements TransactionGateway {
     }
 
     @Override
-    public Optional<Transaction> findByEndToEndId(String endToEndId) {
+    public Optional<Transaction> findByEndToEndId(UUID endToEndId) {
         log.info("Searching for transaction with endToEndId {}", endToEndId);
         return repository.findByEndToEndId(endToEndId).map(this::toDomain);
     }

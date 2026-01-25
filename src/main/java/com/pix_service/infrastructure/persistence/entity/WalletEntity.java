@@ -19,7 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class WalletEntity {
     @Id
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @JdbcTypeCode(SqlTypes.UUID)
     private UUID id;
 
     @Column(nullable = false)

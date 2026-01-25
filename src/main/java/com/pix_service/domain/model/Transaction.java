@@ -5,13 +5,13 @@ import java.util.UUID;
 
 public class Transaction {
     private final UUID id;
-    private final String endToEndId;
+    private final UUID endToEndId;
     private final UUID senderWalletId;
     private final UUID receiverWalletId;
     private final BigDecimal amount;
     private TransactionStatus status;
 
-    public Transaction(UUID id, String endToEndId, UUID senderWalletId, UUID receiverWalletId, BigDecimal amount, TransactionStatus status) {
+    public Transaction(UUID id, UUID endToEndId, UUID senderWalletId, UUID receiverWalletId, BigDecimal amount, TransactionStatus status) {
         this.id = id;
         this.endToEndId = endToEndId;
         this.senderWalletId = senderWalletId;
@@ -38,7 +38,7 @@ public class Transaction {
         return id;
     }
 
-    public String getEndToEndId() {
+    public UUID getEndToEndId() {
         return endToEndId;
     }
 

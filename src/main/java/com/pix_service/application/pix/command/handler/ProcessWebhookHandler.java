@@ -1,6 +1,6 @@
-package com.pix_service.application.usecases.pix;
+package com.pix_service.application.pix.command.handler;
 
-import com.pix_service.application.dto.WebhookRequest;
+import com.pix_service.application.pix.command.ProcessWebhookCommand;
 import com.pix_service.domain.gateway.IdempotencyGateway;
 import com.pix_service.domain.gateway.LedgerEntryGateway;
 import com.pix_service.domain.gateway.TransactionGateway;
@@ -9,57 +9,60 @@ import com.pix_service.domain.model.LedgerEntry;
 import com.pix_service.domain.model.Transaction;
 import com.pix_service.domain.model.TransactionType;
 import com.pix_service.domain.model.Wallet;
+import com.pix_service.shared.application.CommandHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
 
-@Service
 @Slf4j
-public class ProcessWebhookUseCase {
+public class ProcessWebhookHandler implements CommandHandler<ProcessWebhookCommand, Void> {
     private final TransactionGateway transactionGateway;
     private final WalletGateway walletGateway;
     private final LedgerEntryGateway ledgerGateway;
     private final IdempotencyGateway idempotencyGateway;
 
-    public ProcessWebhookUseCase(TransactionGateway transactionGateway, WalletGateway walletGateway, LedgerEntryGateway ledgerGateway, IdempotencyGateway idempotencyGateway) {
+    public ProcessWebhookHandler(TransactionGateway transactionGateway, WalletGateway walletGateway, LedgerEntryGateway ledgerGateway, IdempotencyGateway idempotencyGateway) {
         this.transactionGateway = transactionGateway;
         this.walletGateway = walletGateway;
         this.ledgerGateway = ledgerGateway;
         this.idempotencyGateway = idempotencyGateway;
     }
 
-    @Transactional
-    public void execute(WebhookRequest webhookRequest) {
-        log.info("Processing webhook for eventId: {}, endToEndId: {}, status: {}", webhookRequest.eventId(), webhookRequest.endToEndId(), webhookRequest.status());
-        if (idempotencyGateway.isEventProcessed(webhookRequest.eventId())) {
-            log.info("Event {} already processed, skipping", webhookRequest.eventId());
-            return;
+    @Override
+    public Void handle(ProcessWebhookCommand command) {
+        UUID endToEndId = command.endToEndId();
+        UUID eventId = command.eventId();
+        String status = command.status();
+
+        log.info("Processing webhook for eventId: {}, endToEndId: {}, status: {}", eventId, endToEndId, status);
+        if (idempotencyGateway.isEventProcessed(eventId)) {
+            log.info("Event {} already processed, skipping", eventId);
+            return null;
         }
 
-        Transaction tx = transactionGateway.findByEndToEndId(webhookRequest.endToEndId())
+        Transaction tx = transactionGateway.findByEndToEndId(endToEndId)
                 .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
 
         if (tx.isFinalState()) {
             log.info("Transaction {} already in final state, skipping", tx.getId());
-            idempotencyGateway.markEventProcessed(webhookRequest.eventId());
-            log.info("Webhook processing completed for eventId: {}", webhookRequest.eventId());
-            return;
+            idempotencyGateway.markEventProcessed(eventId);
+            log.info("Webhook processing completed for eventId: {}", eventId);
+            return null;
         }
 
-        if ("CONFIRMED".equals(webhookRequest.status())) {
+        if ("CONFIRMED".equals(status)) {
             log.info("Processing confirmation for transaction {}", tx.getId());
             processConfirmation(tx);
-        } else if ("REJECTED".equals(webhookRequest.status())) {
+        } else if ("REJECTED".equals(status)) {
             log.info("Processing rejection for transaction {}", tx.getId());
             processRejection(tx);
         }
 
         transactionGateway.save(tx);
-        idempotencyGateway.markEventProcessed(webhookRequest.eventId());
-        log.info("Webhook processing completed for eventId: {}", webhookRequest.eventId());
+        idempotencyGateway.markEventProcessed(eventId);
+        log.info("Webhook processing completed for eventId: {}", eventId);
+        return null;
     }
 
     private void processConfirmation(Transaction transaction) {

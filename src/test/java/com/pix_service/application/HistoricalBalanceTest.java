@@ -11,12 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -40,7 +35,7 @@ public class HistoricalBalanceTest {
         entry1.setWalletId(walletId);
         entry1.setAmount(new BigDecimal("1000.00"));
         entry1.setType("DEPOSIT");
-        entry1.setEndToEndId("E2E-" + UUID.randomUUID());
+        entry1.setEndToEndId(UUID.randomUUID());
         entry1.setCreatedAt(pastDate);
         ledgerRepo.saveAndFlush(entry1);
 
@@ -49,7 +44,7 @@ public class HistoricalBalanceTest {
         entry2.setWalletId(walletId);
         entry2.setAmount(new BigDecimal("-200.00"));
         entry2.setType("TRANSFER");
-        entry2.setEndToEndId("E2E-" + UUID.randomUUID());
+        entry2.setEndToEndId(UUID.randomUUID());
         entry2.setCreatedAt(futureDate);
         ledgerRepo.saveAndFlush(entry2);
 

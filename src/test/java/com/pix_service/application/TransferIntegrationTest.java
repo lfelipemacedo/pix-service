@@ -1,13 +1,12 @@
 package com.pix_service.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pix_service.application.dto.TransferRequest;
+import com.pix_service.infrastructure.controller.dto.TransferRequest;
 import com.pix_service.infrastructure.persistence.entity.WalletEntity;
 import com.pix_service.infrastructure.persistence.repository.IdempotencyKeyJpaRepository;
 import com.pix_service.infrastructure.persistence.repository.LedgerEntryJpaRepository;
 import com.pix_service.infrastructure.persistence.repository.TransactionJpaRepository;
 import com.pix_service.infrastructure.persistence.repository.WalletJpaRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +89,7 @@ public class TransferIntegrationTest {
     @Test
     void shouldReturnCachedResponseForSameIdempotencyKey() throws Exception {
         TransferRequest req = new TransferRequest(senderId, receiverPixKey, new BigDecimal("100.00"));
-        String key = "unique-key-123";
+        UUID key = UUID.randomUUID();
 
         mockMvc.perform(post("/pix/transfers")
                         .header("Idempotency-Key", key)

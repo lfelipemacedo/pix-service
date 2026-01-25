@@ -9,6 +9,6 @@ public record LedgerEntry(UUID id,
                           UUID walletId,
                           BigDecimal amount,
                           TransactionType transactionType,
-                          String endToEndId,
+                          UUID endToEndId,
                           Instant createdAt) {
 }

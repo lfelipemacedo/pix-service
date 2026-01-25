@@ -19,18 +19,19 @@ import java.util.UUID;
 @NoArgsConstructor
 public class TransactionEntity {
     @Id
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @JdbcTypeCode(SqlTypes.UUID)
     private UUID id;
 
     @Column(name = "end_to_end_id", nullable = false, unique = true)
-    private String endToEndId;
+    @JdbcTypeCode(SqlTypes.UUID)
+    private UUID endToEndId;
 
     @Column(name = "sender_wallet_id", nullable = false)
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @JdbcTypeCode(SqlTypes.UUID)
     private UUID senderWalletId;
 
     @Column(name = "receiver_wallet_id", nullable = false)
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @JdbcTypeCode(SqlTypes.UUID)
     private UUID receiverWalletId;
 
     @Column(nullable = false)

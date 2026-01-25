@@ -1,7 +1,7 @@
 package com.pix_service.application;
 
-import com.pix_service.application.dto.TransferRequest;
-import com.pix_service.application.usecases.pix.TransferPixUseCase;
+import com.pix_service.application.pix.command.TransferPixCommand;
+import com.pix_service.application.pix.command.handler.TransferPixHandler;
 import com.pix_service.infrastructure.persistence.entity.WalletEntity;
 import com.pix_service.infrastructure.persistence.repository.WalletJpaRepository;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ActiveProfiles("test")
 public class ConcurrencyTest {
     @Autowired
-    private TransferPixUseCase transferUseCase;
+    private TransferPixHandler transferPixCommandHandler;
     @Autowired
     private WalletJpaRepository walletRepo;
 
@@ -61,10 +61,10 @@ public class ConcurrencyTest {
             futures.add(executor.submit(() -> {
                 try {
                     latch.await();
-                    String idempotencyKey = UUID.randomUUID().toString();
-                    TransferRequest req = new TransferRequest(senderId, "receiver@test.com", new BigDecimal("80.00"));
+                    UUID idempotencyKey = UUID.randomUUID();
+                    TransferPixCommand transferPixCommand = new TransferPixCommand(idempotencyKey, senderId, "receiver@test.com", new BigDecimal("80.00"));
 
-                    transferUseCase.execute(idempotencyKey, req);
+                    transferPixCommandHandler.handle(transferPixCommand);
                     return "SUCCESS";
                 } catch (ObjectOptimisticLockingFailureException e) {
                     return "OPTIMISTIC_LOCK_FAIL";

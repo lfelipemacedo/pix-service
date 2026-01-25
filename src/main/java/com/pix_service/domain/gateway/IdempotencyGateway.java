@@ -1,13 +1,16 @@
 package com.pix_service.domain.gateway;
 
+import com.pix_service.application.pix.dto.TransferPixResponse;
+
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IdempotencyGateway {
-    Optional<Object> findResult(String key);
+    Optional<Object> findResult(UUID key);
 
-    void saveResult(String key, Object result);
+    void saveResult(UUID key, TransferPixResponse response);
 
-    boolean isEventProcessed(String eventId);
+    boolean isEventProcessed(UUID eventId);
 
-    void markEventProcessed(String eventId);
+    void markEventProcessed(UUID eventId);
 }

@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+
 @Repository
 public interface LedgerEntryJpaRepository extends JpaRepository<LedgerEntryEntity, UUID> {
     @Query("SELECT COALESCE(SUM(l.amount), 0) FROM LedgerEntryEntity l WHERE l.walletId = :id AND l.createdAt <= :at")

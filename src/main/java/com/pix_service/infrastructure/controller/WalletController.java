@@ -1,10 +1,13 @@
 package com.pix_service.infrastructure.controller;
 
-import com.pix_service.application.usecases.wallet.AddPixKeyUseCase;
-import com.pix_service.application.usecases.wallet.CreateWalletUseCase;
-import com.pix_service.application.usecases.wallet.GetBalanceUseCase;
-import com.pix_service.application.usecases.wallet.WalletOperationsUseCase;
-import com.pix_service.domain.model.Wallet;
+import com.pix_service.application.wallet.command.AddPixKeyCommand;
+import com.pix_service.application.wallet.command.CreateWalletCommand;
+import com.pix_service.application.wallet.command.GetBalanceCommand;
+import com.pix_service.application.wallet.command.WalletOperationsCommand;
+import com.pix_service.infrastructure.bus.PipelineCommandBus;
+import com.pix_service.infrastructure.controller.dto.CreateWalletRequest;
+import com.pix_service.infrastructure.controller.dto.PixKeyRequest;
+import com.pix_service.infrastructure.controller.dto.WalletOperationsRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,55 +25,47 @@ import java.util.UUID;
 @RequestMapping("/wallets")
 @Slf4j
 public class WalletController {
-    private final CreateWalletUseCase createUseCase;
-    private final GetBalanceUseCase getBalanceUseCase;
-    private final AddPixKeyUseCase addPixKeyUseCase;
-    private final WalletOperationsUseCase walletOperationsUseCase;
+    private final PipelineCommandBus pipelineCommandBus;
 
-    public WalletController(CreateWalletUseCase createUseCase, GetBalanceUseCase getBalanceUseCase, AddPixKeyUseCase addPixKeyUseCase, WalletOperationsUseCase walletOperationsUseCase) {
-        this.createUseCase = createUseCase;
-        this.getBalanceUseCase = getBalanceUseCase;
-        this.addPixKeyUseCase = addPixKeyUseCase;
-        this.walletOperationsUseCase = walletOperationsUseCase;
+    public WalletController(PipelineCommandBus pipelineCommandBus) {
+        this.pipelineCommandBus = pipelineCommandBus;
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, UUID>> create(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<Map<String, UUID>> create(@RequestBody CreateWalletRequest request) {
         log.info("Creating wallet with request: {}", request);
-        Wallet createdWallet = createUseCase.execute((String) request.get("pixKey"), new BigDecimal(request.get("balance").toString()));
-        log.info("Created wallet: {}", createdWallet);
-        return ResponseEntity.status(201).body(Map.of("id", createdWallet.getId()));
+        return ResponseEntity
+                .status(201)
+                .body(Map.of("walletId", pipelineCommandBus.dispatch(CreateWalletCommand.with(request.pixKey(), request.balance()))));
     }
 
     @PostMapping("/{id}/pix-keys")
-    public ResponseEntity<Void> registerKey(@PathVariable UUID id, @RequestBody Map<String, String> body) {
-        log.info("Registering pix key for wallet {}: {}", id, body);
-        addPixKeyUseCase.execute(id, body.get("pixKey"));
-        log.info("Registered pix key for wallet {}: {}", id, body.get("pixKey"));
+    public ResponseEntity<Void> registerKey(@PathVariable("id") String walletId, @RequestBody PixKeyRequest request) {
+        log.info("Registering pix key for wallet {}: {}", walletId, request.pixKey());
+        pipelineCommandBus.dispatch(AddPixKeyCommand.with(walletId, request.pixKey()));
+        log.info("Registered pix key for wallet {}: {}", walletId, request.pixKey());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}/balance")
-    public ResponseEntity<Map<String, BigDecimal>> getBalance(@PathVariable UUID id) {
-        log.info("Getting balance for wallet {}", id);
-        BigDecimal balance = getBalanceUseCase.execute(id);
-        log.info("Balance for wallet {}: {}", id, balance);
-        return ResponseEntity.ok(Map.of("balance", balance));
+    public ResponseEntity<Map<String, BigDecimal>> getBalance(@PathVariable("id") String walletId) {
+        log.info("Getting balance for wallet {}", walletId);
+        return ResponseEntity.ok(Map.of("balance", pipelineCommandBus.dispatch(GetBalanceCommand.with(walletId))));
     }
 
     @PostMapping("/{id}/deposit")
-    public ResponseEntity<Void> deposit(@PathVariable UUID id, @RequestBody Map<String, BigDecimal> body) {
-        log.info("Depositing to wallet {}: {}", id, body);
-        walletOperationsUseCase.deposit(id, body.get("amount"));
-        log.info("Deposited to wallet {}: {}", id, body);
+    public ResponseEntity<Void> deposit(@PathVariable("id") String walletId, @RequestBody WalletOperationsRequest request) {
+        log.info("Depositing to wallet {}: {}", walletId, request.amount());
+        pipelineCommandBus.dispatch(WalletOperationsCommand.with(walletId, request.amount(), "DEPOSIT"));
+        log.info("Deposited to wallet {}: {}", walletId, request.amount());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/withdraw")
-    public ResponseEntity<Void> withdraw(@PathVariable UUID id, @RequestBody Map<String, BigDecimal> body) {
-        log.info("Withdrawing from wallet {}: {}", id, body);
-        walletOperationsUseCase.withdraw(id, body.get("amount"));
-        log.info("Withdrawn from wallet {}: {}", id, body);
+    public ResponseEntity<Void> withdraw(@PathVariable("id") String walletId, @RequestBody WalletOperationsRequest request) {
+        log.info("Withdrawing from wallet {}: {}", walletId, request.amount());
+        pipelineCommandBus.dispatch(WalletOperationsCommand.with(walletId, request.amount(), "WITHDRAW"));
+        log.info("Withdrawn from wallet {}: {}", walletId, request.amount());
         return ResponseEntity.noContent().build();
     }
 }

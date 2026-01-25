@@ -2,6 +2,7 @@ package com.pix_service.infrastructure.persistence.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -19,11 +20,11 @@ import java.util.UUID;
 @NoArgsConstructor
 public class LedgerEntryEntity {
     @Id
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @JdbcTypeCode(SqlTypes.UUID)
     private UUID id;
 
     @Column(name = "wallet_id", nullable = false)
-    @JdbcTypeCode(SqlTypes.CHAR)
+    @JdbcTypeCode(SqlTypes.UUID)
     private UUID walletId;
 
     @Column(nullable = false)
@@ -33,7 +34,8 @@ public class LedgerEntryEntity {
     private String type;
 
     @Column(name = "end_to_end_id", nullable = false)
-    private String endToEndId;
+    @JdbcTypeCode(SqlTypes.UUID)
+    private UUID endToEndId;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
